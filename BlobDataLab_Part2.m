@@ -67,23 +67,30 @@ woa_time = [datenum(2013,1:12,15) datenum(2014,1:12,15)...
 woa_papa_rep = [repmat(woa_papa,7,1); woa_papa(1:3)];
 
 %% 2b. Plot the WOA temperature time series along with the OOI temperature time series from Part 1
-% -->
+clf;
+figure(1)
+openfig("OOI_Temp_Time.fig")
+hold on; 
+plot(woa_time, woa_papa_rep, "LineWidth",2, Color = "b");
 
 %% 3a. Interpolate WOA data onto the times where the OOI data were collected at Ocean Station Papa
 % Use the "interp1" function to interplate the World Ocean Atlas
 % temperature data over the extended timeline (woa_papa_rep) from the
 % original extended monthly data (woa_time) onto the times when the OOI
 % data were collected (from your Part 1 analysis)
-% -->
+Interp_Woa = interp1(woa_time, woa_papa_rep, time_final);
 
 %% 3b. Calculate the temperature anomaly as the difference between the OOI mooring
 % observations (using the smoothed data during good intervals) and the
 % climatological data from the World Ocean Atlas interpolated onto those
 % same timepoints
-% -->
+TempAnom = temp - Interp_Woa;
 
 %% 4. Plot the time series of the T anomaly you have now calculated by combining the WOA and OOI data
-
+clf;
+figure(2)
+plot(time_final, TempAnom);
+datetick("x", 22);
 %% 5. Now bring in the satellite data observed at Ocean Station Papa
 
 %5a. Convert satellite time to MATLAB timestamp (following the same approach
