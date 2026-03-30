@@ -67,24 +67,31 @@ woa_time = [datenum(2013,1:12,15) datenum(2014,1:12,15)...
 woa_papa_rep = [repmat(woa_papa,7,1); woa_papa(1:3)];
 
 %% 2b. Plot the WOA temperature time series along with the OOI temperature time series from Part 1
+
 openfig("OOI_Temp_Time.fig")
 hold on; 
 plot(woa_time, woa_papa_rep, "LineWidth",2, Color = "b");
+hold off;
 
 %% 3a. Interpolate WOA data onto the times where the OOI data were collected at Ocean Station Papa
 % Use the "interp1" function to interplate the World Ocean Atlas
 % temperature data over the extended timeline (woa_papa_rep) from the
 % original extended monthly data (woa_time) onto the times when the OOI
 % data were collected (from your Part 1 analysis)
-interp1(woa_time, woa_papa_rep, )
+Interp_Woa = interp1(woa_time, woa_papa_rep, full_times);
 
 %% 3b. Calculate the temperature anomaly as the difference between the OOI mooring
 % observations (using the smoothed data during good intervals) and the
 % climatological data from the World Ocean Atlas interpolated onto those
 % same timepoints
-% -->
+TempAnom = full_temps - Interp_Woa;
 
 %% 4. Plot the time series of the T anomaly you have now calculated by combining the WOA and OOI data
+
+figure(2); clf
+plot(full_times, TempAnom);
+datetick("x", 22);
+hold on
 
 %% 5. Now bring in the satellite data observed at Ocean Station Papa
 
@@ -92,16 +99,32 @@ interp1(woa_time, woa_papa_rep, )
 %as in Part 1 step 2, where you will need to check the units on the satellite data
 %timestamp and use the datenum function to make the conversion)
 % -->
+filename = "jplMURSST41anommday_c13d_98d6_5caa.nc"
+%ncdisp(filename);
+satLat = ncread(filename, "latitude");
+satLon = ncread(filename, "longitude");
+satTime = ncread(filename, "time");
+satTemp = ncread(filename, "sstAnom");
+
+time_days = satTime / 86400;
+time0 = datenum("1970-01-01 00:00:00");
+satellite_time_final = time0 + time_days;
+Datestring = datestr(satellite_time_final);
 
 %5b. In order to extract the satellite SSTanom data from the grid cell
 %nearest to OSP, calculate the indices of the longitude and latitude in the
 %satellite data grid nearest to the latitude and longitude of Ocean Station
 %Papa (as you did for the WOA data in Step 1 above)
-% -->
-% -->
+
+satLatDif = abs(ooiLat - satLat);
+[minSatLatDif, satIndLat] = min(satLatDif);
+
+satLonDif = abs(ooiLon - satLon);
+[minSatLonDif, satIndLon] = min(satLonDif);
 
 %% 6. Plot the satellite SSTanom data extracted from Ocean Station Papa and
 %the mooring-based temperature anomaly calculated by combining the OOI and
 %WOA data together as separate lines on the same time-series plot (adding
 %to your plot from step 4) so that you can compare the two records
 
+sat_sstanom = squeeze(satTemp(satIndLon,satIndLat,:));
